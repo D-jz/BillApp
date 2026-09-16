@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 盘子 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,72m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0" />
+    <path
+        android:fillColor="#FFD166"
+        android:pathData="M54,72m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0" />
+    <!-- 叉子 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,30 L38,52 L41,52 L41,30 L38,30 Z M35,30 L35,55 L44,55 L44,30 L41,30 L41,52 L38,52 L38,30 Z" />
+    <!-- 刀 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,30 L64,55 L69,55 L69,30 L64,30 Z" />
+</vector>
