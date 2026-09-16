@@ -79,6 +79,7 @@ fun MapPickerScreen(
 
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var aMap by remember { mutableStateOf<AMap?>(null) }
+    var currentMarker by remember { mutableStateOf<Marker?>(null) }
     var selectedLat by remember { mutableStateOf<Double?>(initialLat) }
     var selectedLng by remember { mutableStateOf<Double?>(initialLng) }
     var address by remember { mutableStateOf(if (initialLat != null) "正在获取地址…" else "点击地图选择位置") }
@@ -154,7 +155,7 @@ fun MapPickerScreen(
                             selectedLat = latLng.latitude
                             selectedLng = latLng.longitude
                             address = "正在获取地址…"
-                            placeMarker(map, latLng)
+                            currentMarker = placeMarker(map, latLng, currentMarker)
                             reverseGeocode(context, latLng.latitude, latLng.longitude) { addr ->
                                 address = addr
                             }
@@ -238,18 +239,18 @@ fun MapPickerScreen(
         if (initialLat != null && initialLng != null) {
             val target = LatLng(initialLat, initialLng)
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(target, 16f))
-            placeMarker(map, target)
+            currentMarker = placeMarker(map, target, currentMarker)
         }
     }
 
     // 生命周期转发给 MapView
+    // onResume/onPause 跟随 Activity 生命周期；onDestroy 仅在 onDispose 中调用一次，避免重复
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             val mv = mapView ?: return@LifecycleEventObserver
             when (event) {
                 Lifecycle.Event.ON_RESUME -> mv.onResume()
                 Lifecycle.Event.ON_PAUSE -> mv.onPause()
-                Lifecycle.Event.ON_DESTROY -> mv.onDestroy()
                 else -> Unit
             }
         }
@@ -261,14 +262,14 @@ fun MapPickerScreen(
     }
 }
 
-/** 在地图上放置标记（清除旧标记） */
-private fun placeMarker(map: AMap, latLng: LatLng) {
-    map.clear()
+/** 在地图上放置标记（仅移除上一个标记，保留定位蓝点等其它图层） */
+private fun placeMarker(map: AMap, latLng: LatLng, oldMarker: Marker?): Marker {
+    oldMarker?.remove()
     val options = MarkerOptions()
         .position(latLng)
         .draggable(true)
         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-    map.addMarker(options)
+    return map.addMarker(options) ?: error("无法添加地图标记")
 }
 
 /** 逆地理编码：经纬度 -> 地址 */
